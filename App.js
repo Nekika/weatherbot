@@ -7,7 +7,7 @@ bot.on('ready', async () => {
 })
 
 bot.on('message', message => {
-    bot.treat(message)
+    bot.inspect(message)
 })
 
 bot.login(API_CONF.client.token)
