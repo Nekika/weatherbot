@@ -1,62 +1,62 @@
-const Discord = require('discord.js');
-const Message = require('./Message');
-const Request = require('./Request');
-const Config = require('./config');
-const WeatherDatas = require('./WeatherDatas');
+const Discord = require('discord.js')
+const WeatherMessage = require('./WeatherMessage')
+const Request = require('./Request')
+const WeatherDatas = require('./WeatherData')
 
-module.exports = class Weatherbot extends Discord.Client{
+class Weatherbot extends Discord.Client{
     // Build a Weatherbot
     constructor() {
-        super();
-        this.token = Config.client.token;
+        super()
     }
 
     // Indicates that the bot is connected to the server and set it's activity
-    init(){
-        console.log(`Logged in as ${this.user.tag}!`);
-        this.user.setActivity('Type !weather | github.com/Nekika/weatherbot');
+    async init(){
+        try {
+            await this.user.setActivity('Type !weather | Made by @Nekika#1693')
+        } catch (e) {
+            throw e
+        }
     }
 
-    // Log the bot to the server
-    login() {
-        return super.login(this.token);
+    // Inspect a message sent by an user or another bot
+    // If it starts by '!weather' it's a request
+    inspect(message) {
+        const regex = /^!weather .*/
+        return message.content.match(regex)
     }
 
     // Treat a request
     treat(message){
-        const request = message.content;
-        if (Request.isValid(request)){
-            this.execute(message)
-        } else {
-            const issue = "Invalid request";
-            this.reject(message, issue)
+        if (this.inspect(message)){
+            const request = message.content
+            if (Request.isValid(request)){
+                this.execute(message)
+            } else {
+                const issue = "Invalid request"
+                this.reject(message, issue)
+            }
         }
     }
 
     // Execute a request
-    execute(message){
-        let datas = null;
-        const split = message.content.split(' ');
-        const arg = split[1];
-        WeatherDatas.getDatas(arg)
-            .then(response => {
-                const weatherdatas = Message.format(response.data);
-                this.send(message, weatherdatas)
-            })
-            .catch(error => {
-                console.log(error);
-                const issue = "Error retriving datas";
-                this.reject(message, issue)
-            })
+    async execute(request){
+        const command = '!weather '
+        const args = request.content.substring(command.length).split(',')
+        const city = {name: args[0], country: args[1] || 'fr'}
+        try {
+            const data =  await WeatherDatas.getData(city)
+            const message = WeatherMessage.create(data)
+            request.channel.send(message)
+        } catch (e) {
+            this.reject(request, e)
+            throw e
+        }
     }
 
     // Reject a request
     reject(message, issue){
-        message.channel.send('Error : ')
+        message.channel.send(issue)
     }
+}
 
-    // Send a message containg weatherdatas
-    send(message, weatherDatas){
-        message.channel.send(weatherDatas)
-    }
-};
+module.exports = Weatherbot
