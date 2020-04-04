@@ -7,7 +7,6 @@ const baseUrl = `https://api.openweathermap.org/data/2.5/weather?APPID=${apiKey}
 module.exports = {
     getData: async function (city) {
         const url = baseUrl + `&q=${city.name},${city.country}`.replace(/ /g, '%20')
-        console.log(url)
         try {
             const res = await axios.get(url)
             return res.data
