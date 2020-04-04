@@ -1,9 +1,6 @@
 module.exports = {
     isValid: function (request) {
-        const regex = /(^!weather [a-zA-Z]*$|^!weather [0-9]{5})$/
-        if (request.match(regex)){
-            return true
-        }
-        return false
+        const regex = /^(!weather [a-zA-Z]+([ -_]?[a-zA-Z]+)*|!weather [0-9]{5})(,[a-zA-Z]{2,3})?$/
+        return request.match(regex)
     }
 };
