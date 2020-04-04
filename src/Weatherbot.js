@@ -18,16 +18,10 @@ class Weatherbot extends Discord.Client{
         }
     }
 
-    // Inspect a message sent by an user or another bot
-    // If it starts by '!weather' it's a request
-    inspect(message) {
-        const regex = /^!weather .*/
-        return message.content.match(regex)
-    }
-
-    // Treat a request
+    // Treat a message
     treat(message){
-        if (this.inspect(message)){
+        const regex = /^!weather .*/
+        if (message.content.match(regex)){
             const request = message.content
             if (Request.isValid(request)){
                 this.execute(message)
